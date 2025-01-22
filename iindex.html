@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Saver</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <div style="text-align:center; margin-top: 50px;">
+        <h1>Text Saver</h1>
+        <textarea id="text-input" rows="4" cols="50" placeholder="Enter some text..."></textarea>
+        <br><br>
+        <button onclick="saveText()">Save Text</button>
+        <br><br>
+        <h2>Saved Texts</h2>
+        <ul id="texts-list"></ul>
+    </div>
+
+    <script>
+        // Backend URL (running locally)
+        const BASE_URL = "http://localhost:3000"; // Local server URL
+
+        // Function to save text
+        function saveText() {
+            const text = document.getElementById('text-input').value;
+            if (text === "") {
+                alert("Please enter some text.");
+                return;
+            }
+
+            // Send the text to the backend
+            axios.post(`${BASE_URL}/save-text`, { text: text })
+                .then(response => {
+                    console.log(response.data);
+                    alert("Text saved successfully!");
+                    fetchTexts(); // Refresh the list
+                })
+                .catch(error => {
+                    console.error("Error saving text:", error);
+                    alert("Error saving text.");
+                });
+        }
+
+        // Function to fetch saved texts
+        function fetchTexts() {
+            axios.get(`${BASE_URL}/get-texts`)
+                .then(response => {
+                    const texts = response.data.texts;
+                    const textsList = document.getElementById('texts-list');
+                    textsList.innerHTML = ""; // Clear the list before updating
+
+                    // Display each text in the list
+                    texts.forEach((text, index) => {
+                        const li = document.createElement('li');
+                        li.textContent = `${index + 1}. ${text}`;
+                        textsList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching texts:", error);
+                });
+        }
+
+        // Fetch texts when the page loads
+        window.onload = fetchTexts;
+    </script>
+</body>
+</html>
